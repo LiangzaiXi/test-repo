@@ -53,9 +53,9 @@ def new_board(level_text):
         "solid": set(),  # 壁の座標集合
         "targets": set(),  # ゴールの座標集合
         "crates": set(),  # 箱の座標集合
-        "hero": None,     # プレイヤーの座標
+        "hero": None,  # プレイヤーの座標
         "steps": 0,
-        "past": [],       # 一手戻すための履歴
+        "past": [],  # 一手戻すための履歴
     }
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
@@ -70,7 +70,11 @@ def new_board(level_text):
                 if board["hero"] is not None:
                     raise ValueError("プレイヤーは1人にしてください")
                 board["hero"] = p
-    if board["hero"] is None or not board["crates"] or len(board["crates"]) != len(board["targets"]):
+    if (
+        board["hero"] is None
+        or not board["crates"]
+        or len(board["crates"]) != len(board["targets"])
+    ):
         raise ValueError("プレイヤー1人、箱とゴールは同数にしてください")
     return board
 
@@ -133,30 +137,20 @@ def push_crate(board, crate_position, vector):
 
 
 def apply_move(board, direction_key):
-    """TODO 1〜3：プレイヤーの移動。引数：board, WASDの1文字。戻り値：成功ならTrue。
-
-    手順のヒント：
-       1. KEY_TO_VECTOR から差分を取り出す
-       2. next_position() で次の座標を計算する
-       3. TODO 1：盤面外なら動かさず、盤面内なら hero を更新する
-       4. TODO 2：壁チェックを追加する
-       5. TODO 3：次が箱なら push_crate() を使う
-
-    正しく動けるときだけ履歴に位置と箱集合のコピーを保存し、stepsを増やす。
-    """
     if direction_key not in KEY_TO_VECTOR:
         return False
     vector = KEY_TO_VECTOR[direction_key]
-    # TODO 1：現在の座標を取得し、次の座標を計算する。
-    #           盤面内なら hero を更新する（最初は壁や箱を無視してよい）。
-    # TODO 2：TODO 1の判定に can_enter() を組み込む。
-    # TODO 3：次の位置が crates に含まれたら push_crate() を呼ぶ。
-    #           箱が動かなければプレイヤーも移動してはいけない。
-    # ヒント：移動が成功するときだけ次を実行する。
-    # board["past"].append((board["hero"], board["crates"].copy()))
-    # board["hero"] = 移動先の座標
-    # board["steps"] += 1
-    return False
+
+    # TODO 1：获取当前坐标，计算下一个坐标
+    dest = next_position(board["hero"], vector)
+    if not in_field(board, dest):
+        return False
+
+    # 保存历史记录并更新玩家位置和步数
+    board["past"].append((board["hero"], board["crates"].copy()))
+    board["hero"] = dest
+    board["steps"] += 1
+    return True
 
 
 def step_back(board):
