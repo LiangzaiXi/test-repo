@@ -115,39 +115,39 @@ def next_position(origin, vector):
 
 
 def can_enter(board, destination):
-    """TODO 2：壁判定。引数：board, 移動先座標。戻り値：移動可ならTrue。
-
-    まず TODO 1 では呼ばなくてもよい。
-    TODO 2 では、盤面内か、壁に含まれるかを確認しよう。
-    デモ版では walls という名前だが、演習版では solid に入っている。
-    """
-    # TODO 2: 条件を実装する（現状では壁も通過できる）
+    """TODO 2：壁判定。引数：board, 移動先座標。戻り値：移動可ならTrue。"""
     return in_field(board, destination) and destination not in board["solid"]
 
 
 def push_crate(board, crate_position, vector):
-    """TODO 3：箱を押す。引数：board, 箱座標, 移動方向。戻り値：押せたらTrue。
-
-    箱の一つ先に別の箱や壁がある場合は押せない。
-    押せる場合は箱の集合を変更する。押せないときは変更しない。
-    デモ版の辞書キー boxes と、演習版の crates は異なる。
-    """
-    # TODO 3: 箱の行き先を調べ、移動可能なら crates を更新する
-    return False
+    """TODO 3：箱を押す。引数：board, 箱座標, 移動方向。戻り値：押せたらTrue。"""
+    beyond = next_position(crate_position, vector)
+    if not can_enter(board, beyond) or beyond in board["crates"]:
+        return False
+    board["crates"].remove(crate_position)
+    board["crates"].add(beyond)
+    return True
 
 
 def apply_move(board, direction_key):
+    """TODO 1〜3：プレイヤーの移動。引数：board, WASDの1文字。戻り値：成功ならTrue。"""
     if direction_key not in KEY_TO_VECTOR:
         return False
     vector = KEY_TO_VECTOR[direction_key]
-
-    # TODO 1：获取当前坐标，计算下一个坐标
     dest = next_position(board["hero"], vector)
+
+    # TODO
     if not can_enter(board, dest):
         return False
 
-    # 保存历史记录并更新玩家位置和步数
-    board["past"].append((board["hero"], board["crates"].copy()))
+    old_crates = board["crates"].copy()
+
+    # TODO
+    if dest in board["crates"]:
+        if not push_crate(board, dest, vector):
+            return False
+
+    board["past"].append((board["hero"], old_crates))
     board["hero"] = dest
     board["steps"] += 1
     return True
